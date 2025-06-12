@@ -1,42 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Grammar Checker Tool</title>
-  <style>
-    body { font-family: sans-serif; padding: 30px; max-width: 600px; margin: auto; }
-    textarea { width: 100%; height: 120px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    .result { margin-top: 20px; background: #f3f3f3; padding: 10px; border-radius: 5px; }
-  </style>
+  <title>AI Blog Content Generator</title>
+  <meta charset="UTF-8">
 </head>
 <body>
-  <h2>Grammar Checker</h2>
-  <textarea id="textInput" placeholder="Paste your content here..."></textarea><br />
-  <button onclick="checkGrammar()">Check Grammar</button>
-
-  <div id="output" class="result"></div>
+  <h2>🤖 AI Blog Generator (Gemini)</h2>
+  <input id="topic" placeholder="Enter topic" />
+  <button onclick="generateContent()">Generate</button>
+  <div id="output" style="white-space: pre-wrap; margin-top: 20px;"></div>
 
   <script>
-    async function checkGrammar() {
-      const text = document.getElementById("textInput").value;
-      const response = await fetch("https://api.languagetoolplus.com/v2/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          text: text,
-          language: "en-US"
-        }),
-      });
-      const result = await response.json();
+    async function generateContent() {
+      const topic = document.getElementById("topic").value.trim();
       const output = document.getElementById("output");
 
-      if (result.matches.length === 0) {
-        output.innerHTML = "<strong>No grammar issues found. ✅</strong>";
-      } else {
-        output.innerHTML = "<strong>Issues Found:</strong><ul>" +
-          result.matches.map(match => `<li>${match.message}</li>`).join('') +
-          "</ul>";
+      if (!topic) return output.innerText = "❌ Please enter a topic.";
+
+      output.innerText = "⏳ Generating...";
+
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycby2MSCvIuWfAEFZP6Ha9O30lvrIglZKvTtZF4sxx6ril6Lwq4caXopfJrnZw0ZuHsXN/exec", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ topic })
+        });
+
+        const data = await res.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        output.innerText = text || "❌ Gemini API returned no content.";
+
+      } catch (err) {
+        output.innerText = "❌ Network error: " + err.message;
       }
     }
   </script>
